@@ -337,7 +337,8 @@ namespace WebApi_ElGas.Controllers
                 return GetErrorResult(result);
             }
 
-            return Ok();
+           
+            return Ok(user);
         }
 
         // POST api/Account/RegisterExternal
