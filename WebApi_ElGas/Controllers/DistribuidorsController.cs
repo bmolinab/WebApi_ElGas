@@ -10,6 +10,7 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using WebApi_ElGas.Context;
 using WebApi_ElGas.Models;
+using WebApi_ElGas.Utils;
 
 namespace WebApi_ElGas.Controllers
 {
@@ -18,6 +19,7 @@ namespace WebApi_ElGas.Controllers
     public class DistribuidorsController : ApiController
     {
         private Model1 db = new Model1();
+        
 
         // GET: api/Distribuidors
         public IQueryable<Distribuidor> GetDistribuidor()
@@ -104,6 +106,58 @@ namespace WebApi_ElGas.Controllers
             return Ok(distribuidor);
         }
 
+        /// <summary>
+        /// Devuelve los distribuidores cercanos segun la posicion
+        /// </summary>
+        /// <param name="myPosicion"></param>
+        /// <returns></returns>
+        [Route("NearDistribuidor")]
+        [ResponseType(typeof(Distribuidor))]
+        [HttpPost]
+        
+        public IHttpActionResult NearDistribuidor(Posicion myPosicion)
+        {
+            List<DistribuidorResponse> distribuidores = new List<DistribuidorResponse>();
+
+            db.Configuration.ProxyCreationEnabled = false;
+
+            foreach (var item in db.Ruta.Where(x => DbFunctions.TruncateTime(x.Fecha) == DateTime.Today).ToList())
+            {
+                if(Geo.EstaCercaDeMi(myPosicion, new Posicion {Latitud=(Double)item.Latitud, Longitud=(Double)item.Longitud }, 10))
+                {
+                    var distribuidor = db.Distribuidor.Where(x => x.IdDistribuidor == item.IdDistribuidor).FirstOrDefault();
+                    if (distribuidores.Count==0 )
+                    {
+                        distribuidores.Add(new DistribuidorResponse {
+
+                            IdDistribuidor= distribuidor.IdDistribuidor,
+                            Identificacion= distribuidor.Identificacion,
+                            Latitud= item.Latitud,
+                            Longitud=item.Longitud
+                        });
+                    }
+                    else
+                    {
+                        foreach (var dis in distribuidores)
+                        {
+                            if (dis.IdDistribuidor != item.IdDistribuidor )
+                            {
+                                distribuidores.Add(new DistribuidorResponse
+                                {
+
+                                    IdDistribuidor = distribuidor.IdDistribuidor,
+                                    Identificacion = distribuidor.Identificacion,
+                                    Latitud = item.Latitud,
+                                    Longitud = item.Longitud
+                                });
+                            }
+                        }                       
+                    }                    
+                }
+            }
+           
+            return Ok(distribuidores.ToList());
+        }
         // DELETE: api/Distribuidors/5
         [ResponseType(typeof(Distribuidor))]
         public IHttpActionResult DeleteDistribuidor(int id)

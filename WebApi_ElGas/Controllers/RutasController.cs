@@ -12,6 +12,8 @@ using WebApi_ElGas.Context;
 
 namespace WebApi_ElGas.Controllers
 {
+    [RoutePrefix("api/Rutas")]
+
     public class RutasController : ApiController
     {
         private Model1 db = new Model1();
@@ -71,6 +73,7 @@ namespace WebApi_ElGas.Controllers
         }
 
         // POST: api/Rutas
+        [Route("PostRutas")]
         [ResponseType(typeof(Ruta))]
         public IHttpActionResult PostRuta(Ruta ruta)
         {
