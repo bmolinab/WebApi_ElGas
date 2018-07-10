@@ -6,6 +6,7 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using WebApi_ElGas.Context;
@@ -85,7 +86,54 @@ namespace WebApi_ElGas.Controllers
             db.SaveChanges();
 
           //  return CreatedAtRoute("DefaultApi", new { id = cliente.IdCliente }, cliente);
-            return Ok();
+            return Ok(cliente);
+
+        }
+        [HttpPost]
+        [Route("GetClientData")]
+        [ResponseType(typeof(Cliente))]
+        public Response GetClientData(Cliente cliente)
+        {
+            try
+            {
+                db.Configuration.ProxyCreationEnabled = false;
+                var Cliente = db.Cliente.Where(x => x.Correo == cliente.Correo).FirstOrDefault();
+                if (Cliente!= null)
+                {
+                    if (cliente.DeviceID != null)
+                    {
+                        Cliente.DeviceID = cliente.DeviceID;
+                        db.SaveChanges();
+                    }
+                    return new Response
+                    {
+                        IsSuccess = true,
+                        Message = "El cliente Existe",
+                        Result = Cliente
+                    };
+                }
+              
+                else
+                    return new Response
+                    {
+                        IsSuccess = true,
+                        Message = "El cliente no xiste",
+                        Result = null
+                    };
+            }
+            catch (Exception ex)
+            {
+
+                return new Response
+                {
+                    IsSuccess = false,
+                    Message = "Ocurrion un problema "+ex.Message,
+                    Result = null
+                };
+            }
+          
+            //  return CreatedAtRoute("DefaultApi", new { id = cliente.IdCliente }, cliente);
+
         }
 
         // DELETE: api/Clientes/5

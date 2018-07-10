@@ -44,6 +44,10 @@ namespace WebApi_ElGas.Context
         [StringLength(128)]
         public string IdAspNetUser { get; set; }
 
+        [StringLength(250)]
+        public string DeviceID { get; set; }
+
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Compra> Compra { get; set; }
 

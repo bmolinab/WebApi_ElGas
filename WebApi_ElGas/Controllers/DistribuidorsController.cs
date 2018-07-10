@@ -106,6 +106,54 @@ namespace WebApi_ElGas.Controllers
             return Ok(distribuidor);
         }
 
+        [HttpPost]
+        [Route("GetDistribuidorData")]
+        [ResponseType(typeof(Distribuidor))]
+        public Response GetDistribuidorData(Distribuidor distribuidor)
+        {
+            try
+            {
+                db.Configuration.ProxyCreationEnabled = false;
+                
+                var Distribuidor = db.Distribuidor.Where(x => x.Correo == distribuidor.Correo).FirstOrDefault();
+                if (Distribuidor != null)
+                {
+                    if(distribuidor.DeviceID!=null)
+                    {
+                        Distribuidor.DeviceID = distribuidor.DeviceID;
+                        db.SaveChanges();
+                    }
+                    return new Response
+                    {
+                        IsSuccess = true,
+                        Message = "El distribuidor Existe",
+                        Result = Distribuidor
+                    };
+                }
+                else
+                    return new Response
+                    {
+                        IsSuccess = true,
+                        Message = "El distribuidor no xiste",
+                        Result = null
+                    };
+            }
+            catch (Exception ex)
+            {
+
+                return new Response
+                {
+                    IsSuccess = false,
+                    Message = "Ocurrion un problema " + ex.Message,
+                    Result = null
+                };
+            }
+
+            //  return CreatedAtRoute("DefaultApi", new { id = cliente.IdCliente }, cliente);
+
+        }
+
+
         /// <summary>
         /// Devuelve los distribuidores cercanos segun la posicion
         /// </summary>

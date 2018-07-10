@@ -81,7 +81,7 @@ namespace WebApi_ElGas.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            ruta.Fecha = DateTime.Now;
             db.Ruta.Add(ruta);
 
             try
