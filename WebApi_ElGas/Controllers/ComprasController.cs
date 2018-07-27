@@ -262,11 +262,14 @@ namespace WebApi_ElGas.Controllers
                 db.Entry(compra).State = EntityState.Modified;
                 compra.Estado = 2;
                 db.SaveChanges();
+                Notificacion(compra, 3);
+                Compra compraresult2 = new Compra { IdCompra = compra.IdCompra, IdDistribuidor = compra.IdDistribuidor};
+
                 return new Response
                 {
                     IsSuccess = true,
-                    Message = "Estos son las ventas pendientes",
-                    Result = compra
+                    Message = "Venta realizada con exito",
+                    Result = compraresult2
                 };
             }
             catch (Exception ex)
@@ -274,6 +277,132 @@ namespace WebApi_ElGas.Controllers
                 return new Response
                 {
                     IsSuccess = true,
+                    Message = "Tenemos un error: " + ex.Message,
+                    Result = null
+                };
+            }
+
+        }
+
+        [HttpPost]
+        [Route("Cancelar")]
+        public async Task<Response> Cancelar(Compra compra)
+        {
+            try
+            {
+                if (compra == null)
+                {
+                    return new Response
+                    {
+                        IsSuccess = true,
+                        Message = "no existe",
+                        Result = null
+
+                    };
+                }
+                db.Configuration.ProxyCreationEnabled = false;
+                Compra compraresult = db.Compra.Find(compra.IdCompra);
+                if (compraresult.Estado != -1)
+                {
+                    db.Configuration.ProxyCreationEnabled = false;
+                    db.Entry(compraresult).State = EntityState.Modified;
+                    compraresult.Estado = -1;
+                    compraresult.IdDistribuidor = compra.IdDistribuidor;
+
+                    db.SaveChanges();
+
+                    Compra compraresult2 = new Compra { IdCompra = compraresult.IdCompra, IdDistribuidor = compraresult.IdDistribuidor };
+
+
+                    await Notificacion(compra, 2);
+
+
+                    return new Response
+                    {
+                        IsSuccess = true,
+                        Message = "Compra cancelada con exito",
+                        Result = compraresult2
+                    };
+                }
+
+
+                return new Response
+                {
+                    IsSuccess = false,
+                    Message = "la cancelacion no pudo ser aplicada",
+                    Result = compraresult
+                };
+
+
+            }
+            catch (Exception ex)
+            {
+                return new Response
+                {
+                    IsSuccess = false,
+                    Message = "Tenemos un error: " + ex.Message,
+                    Result = null
+                };
+            }
+
+        }
+
+        [HttpPost]
+        [Route("Calificar")]
+        public async Task<Response> Calificar(Compra compra)
+        {
+            try
+            {
+                if (compra == null)
+                {
+                    return new Response
+                    {
+                        IsSuccess = true,
+                        Message = "no existe",
+                        Result = null
+
+                    };
+                }
+                db.Configuration.ProxyCreationEnabled = false;
+                Compra compraresult = db.Compra.Find(compra.IdCompra);
+                if (compraresult.Estado != -1)
+                {
+                    db.Configuration.ProxyCreationEnabled = false;
+                    db.Entry(compraresult).State = EntityState.Modified;
+                    compraresult.Calificacion = compra.Calificacion ;
+                    compraresult.IdDistribuidor = compra.IdDistribuidor;
+
+                    db.SaveChanges();
+
+                    Compra compraresult2 = new Compra { IdCompra = compraresult.IdCompra, IdDistribuidor = compraresult.IdDistribuidor };
+
+
+                   // await Notificacion(compra, 2);
+
+
+                    return new Response
+                    {
+                        IsSuccess = true,
+                        Message = "Compra calificada con exito",
+                        Result = compraresult2
+                    };
+                }
+
+
+                return new Response
+                {
+                    IsSuccess = false,
+                    Message = "la calificacion no pudo ser aplicada",
+                    Result = compraresult
+                };
+
+
+            }
+            catch (Exception ex)
+            {
+                return new Response
+                {
+                    IsSuccess = false,
                     Message = "Tenemos un error: " + ex.Message,
                     Result = null
                 };
@@ -299,22 +428,24 @@ namespace WebApi_ElGas.Controllers
                         }
                         if (ultimapos.Count > 0)
                         {
-                            Posicion myposicion = new Posicion { Latitud = (double)compra.Latitud, Longitud = (double)compra.Longitud };
+                            //Posicion myposicion = new Posicion { Latitud = (double)compra.Latitud, Longitud = (double)compra.Longitud };
+
                             foreach (var item in ultimapos)
                             {
-                                Posicion posicionVendedor = new Posicion
-                                {
-                                    Latitud = (double)item.Latitud,
-                                    Longitud = (double)item.Longitud,
-                                };
+                                //Posicion posicionVendedor = new Posicion
+                                //{
+                                //    Latitud = (double)item.Latitud,
+                                //    Longitud = (double)item.Longitud,
+                                //};
 
-                                if (Geo.EstaCercaDeMi(myposicion, posicionVendedor, 10))
-                                {
+                                //if (Geo.EstaCercaDeMi(myposicion, posicionVendedor, 10))
+                                //{
                                     Debug.WriteLine("se debe notifica a {0}", item.IdDistribuidor);
                                     List<string> tags = new List<string>();
-                                    tags.Add("camion");
-                                    await AzureHubUtils.SendNotificationAsync(string.Format("Un cliente desea {0} tanque(s)", compra.Cantidad), tags, item.Distribuidor.DeviceID, "1", compra.IdCompra);
-                                }
+                                    tags.Add(item.Distribuidor.DeviceID);
+
+                                    await AzureHubUtils.SendNotificationAsync(string.Format("Un cliente desea {0} tanque(s)", compra.Cantidad), tags, item.Distribuidor.DeviceID, "1", compra.IdCompra, item.IdDistribuidor.Value.ToString());
+                              //  }
 
 
 
@@ -341,8 +472,8 @@ namespace WebApi_ElGas.Controllers
 
                         Debug.WriteLine("se debe notifica a {0}", cliente.DeviceID);
                         List<string> tags = new List<string>();
-                        tags.Add("cliente");
-                        await AzureHubUtils.SendNotificationAsync("Su pedido ha sido confirmado, un distribuidor está en camino para realizar la entrega", tags, cliente.DeviceID, "1", compra.IdCompra);
+                        tags.Add(cliente.DeviceID);
+                        await AzureHubUtils.SendNotificationAsync("Su pedido ha sido confirmado, un distribuidor está en camino para realizar la entrega", tags, cliente.DeviceID, "1", compra.IdCompra, compra.IdDistribuidor.ToString());
                         return true;
 
                     }
@@ -352,6 +483,26 @@ namespace WebApi_ElGas.Controllers
 
                         throw;
                     }
+                case 3:
+                    try
+                    {
+                        db.Configuration.ProxyCreationEnabled = false;
+                        var cliente = db.Cliente.Where(x => x.IdCliente == compra.IdCliente).FirstOrDefault();
+
+                        Debug.WriteLine("se debe notifica a {0}", cliente.DeviceID);
+                        List<string> tags = new List<string>();
+                        tags.Add(cliente.DeviceID);
+                        await AzureHubUtils.SendNotificationAsync("Gracias por  confiar en nosotros, Por favor califica el servicio brindado", tags, cliente.DeviceID, "3", compra.IdCompra, compra.IdDistribuidor.ToString());
+                        return true;
+
+                    }
+                    catch (Exception)
+                    {
+                        return false;
+
+                        throw;
+                    }
+
                 default:
                     {
                         return false;

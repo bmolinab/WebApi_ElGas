@@ -90,7 +90,7 @@ namespace WebApi_ElGas.Controllers
             db.Distribuidor.Add(distribuidor);
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = distribuidor.IdDistribuidor }, distribuidor);
+            return Ok();
         }
 
         [Route("GetforUser")]
@@ -98,6 +98,7 @@ namespace WebApi_ElGas.Controllers
         [HttpPost]
         public IHttpActionResult GetforUser(RegisterBindingModel registerBindingModel)
         {
+            db.Configuration.ProxyCreationEnabled = false;
             Distribuidor distribuidor = db.Distribuidor.Where(x => x.Correo == registerBindingModel.Email).FirstOrDefault();
             if (distribuidor == null)
             {
@@ -153,6 +154,52 @@ namespace WebApi_ElGas.Controllers
 
         }
 
+        [HttpPost]
+        [Route("GetDistribuidorID")]
+        [ResponseType(typeof(Distribuidor))]
+        public Response GetDistribuidorID(Distribuidor distribuidor)
+        {
+            try
+            {
+                db.Configuration.ProxyCreationEnabled = false;
+
+                var Distribuidor = db.Distribuidor.Where(x => x.IdDistribuidor == distribuidor.IdDistribuidor).FirstOrDefault();
+                if (Distribuidor != null)
+                {
+                    if (distribuidor.DeviceID != null)
+                    {
+                        Distribuidor.DeviceID = distribuidor.DeviceID;
+                        db.SaveChanges();
+                    }
+                    return new Response
+                    {
+                        IsSuccess = true,
+                        Message = "El distribuidor Existe",
+                        Result = Distribuidor
+                    };
+                }
+                else
+                    return new Response
+                    {
+                        IsSuccess = true,
+                        Message = "El distribuidor no xiste",
+                        Result = null
+                    };
+            }
+            catch (Exception ex)
+            {
+
+                return new Response
+                {
+                    IsSuccess = false,
+                    Message = "Ocurrion un problema " + ex.Message,
+                    Result = null
+                };
+            }
+
+            //  return CreatedAtRoute("DefaultApi", new { id = cliente.IdCliente }, cliente);
+
+        }
 
         /// <summary>
         /// Devuelve los distribuidores cercanos segun la posicion
