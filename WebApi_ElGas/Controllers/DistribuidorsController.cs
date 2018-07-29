@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -214,44 +215,52 @@ namespace WebApi_ElGas.Controllers
         {
             List<DistribuidorResponse> distribuidores = new List<DistribuidorResponse>();
 
+
             db.Configuration.ProxyCreationEnabled = false;
-
-            foreach (var item in db.Ruta.Where(x => DbFunctions.TruncateTime(x.Fecha) == DateTime.Today).ToList())
+            try
             {
-                if(Geo.EstaCercaDeMi(myPosicion, new Posicion {Latitud=(Double)item.Latitud, Longitud=(Double)item.Longitud }, 10))
+
+                var RutasHoy =  db.Ruta.Where(x => DbFunctions.TruncateTime(x.Fecha) == DateTime.Today).ToList();
+
+
+
+
+                var result = RutasHoy.GroupBy(g => g.IdDistribuidor).ToList();
+
+                // Loop over groups.
+                foreach (var group in result)
                 {
-                    var distribuidor = db.Distribuidor.Where(x => x.IdDistribuidor == item.IdDistribuidor).FirstOrDefault();
-                    if (distribuidores.Count==0 )
-                    {
-                        distribuidores.Add(new DistribuidorResponse {
+                    var value = group.OrderByDescending(x => x.Fecha).FirstOrDefault();
 
-                            IdDistribuidor= distribuidor.IdDistribuidor,
-                            Identificacion= distribuidor.Identificacion,
-                            Latitud= item.Latitud,
-                            Longitud=item.Longitud
-                        });
-                    }
-                    else
-                    {
-                        foreach (var dis in distribuidores)
-                        {
-                            if (dis.IdDistribuidor != item.IdDistribuidor )
-                            {
-                                distribuidores.Add(new DistribuidorResponse
-                                {
+                    var identificacion = db.Distribuidor.Where(x => x.IdDistribuidor == value.IdDistribuidor).Select(s => s.Identificacion).FirstOrDefault();
 
-                                    IdDistribuidor = distribuidor.IdDistribuidor,
-                                    Identificacion = distribuidor.Identificacion,
-                                    Latitud = item.Latitud,
-                                    Longitud = item.Longitud
-                                });
-                            }
-                        }                       
-                    }                    
+
+                    distribuidores.Add(new DistribuidorResponse
+                    {
+
+                        IdDistribuidor = (int) value.IdDistribuidor,
+                        Identificacion = identificacion,
+                        Latitud = value.Latitud,
+                        Longitud = value.Longitud
+                    });               
                 }
-            }
+
+
+
+                Debug.WriteLine(distribuidores.Count());
+
+
+
+
            
             return Ok(distribuidores.ToList());
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
         }
         // DELETE: api/Distribuidors/5
         [ResponseType(typeof(Distribuidor))]
