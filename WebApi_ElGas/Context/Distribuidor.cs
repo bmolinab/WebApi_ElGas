@@ -13,6 +13,8 @@ namespace WebApi_ElGas.Context
         public Distribuidor()
         {
             Compra = new HashSet<Compra>();
+            CompraCancelada = new HashSet<CompraCancelada>();
+            SectorDistribuidor = new HashSet<SectorDistribuidor>();
             Ruta = new HashSet<Ruta>();
         }
 
@@ -47,16 +49,21 @@ namespace WebApi_ElGas.Context
         [StringLength(250)]
         public string DeviceID { get; set; }
 
-        public bool Habilitado { get; set; }
+        public bool? Habilitado { get; set; }
+
+        [StringLength(100)]
+        public string FirebaseID { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Compra> Compra { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CompraCancelada> CompraCancelada { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<SectorDistribuidor> SectorDistribuidor { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Ruta> Ruta { get; set; }
-
-        public virtual TipoSuscripcion TipoSuscripcion { get; set; }
-
-        
     }
 }

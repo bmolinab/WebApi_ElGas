@@ -9,6 +9,12 @@ namespace WebApi_ElGas.Context
     [Table("Compra")]
     public partial class Compra
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Compra()
+        {
+            CompraCancelada = new HashSet<CompraCancelada>();
+        }
+
         [Key]
         public int IdCompra { get; set; }
 
@@ -28,7 +34,16 @@ namespace WebApi_ElGas.Context
 
         public int? Calificacion { get; set; }
 
+        public DateTime? FechaPedido { get; set; }
+
+        public DateTime? FechaAplica { get; set; }
+
+        public DateTime? FechaFinalizacion { get; set; }
+
         public virtual Cliente Cliente { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CompraCancelada> CompraCancelada { get; set; }
 
         public virtual Distribuidor Distribuidor { get; set; }
     }

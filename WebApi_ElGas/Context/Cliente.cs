@@ -12,6 +12,7 @@ namespace WebApi_ElGas.Context
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Cliente()
         {
+            CompraCancelada = new HashSet<CompraCancelada>();
             Compra = new HashSet<Compra>();
         }
 
@@ -46,8 +47,12 @@ namespace WebApi_ElGas.Context
         [StringLength(250)]
         public string DeviceID { get; set; }
 
-        public bool Habilitado { get; set; }
+        public bool? Habilitado { get; set; }
 
+        public DateTime? FechaRegistro { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CompraCancelada> CompraCancelada { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Compra> Compra { get; set; }

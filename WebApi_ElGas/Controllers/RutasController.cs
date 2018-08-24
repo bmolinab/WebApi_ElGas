@@ -105,8 +105,8 @@ namespace WebApi_ElGas.Controllers
 
             db.Configuration.ProxyCreationEnabled = false;
             var compra = db.Compra.Where(x => x.IdDistribuidor == ruta.IdDistribuidor && x.Estado == 1).FirstOrDefault();
-            var posactual = new Models.Posicion() { Latitud=(double)ruta.Latitud, Longitud=(double)ruta.Longitud};
-            var poscompra = new Models.Posicion() { Latitud=(double)compra.Latitud, Longitud=(double)compra.Longitud};
+            var posactual = new Models.Posicion() { Latitud = (double)ruta.Latitud, Longitud = (double)ruta.Longitud };
+            var poscompra = new Models.Posicion() { Latitud = (double)compra.Latitud, Longitud = (double)compra.Longitud };
             // esto es para saber si esta cerca y enviarle la notificacion
             if (Utils.Geo.EstaCercaDeMi(posactual, poscompra, 2))
             {
@@ -148,7 +148,7 @@ namespace WebApi_ElGas.Controllers
                     Message = "Error: " + ex.Message,
                     Result = ex,
                 };
-            }            
+            }
         }
 
 

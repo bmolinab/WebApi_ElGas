@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -7,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Web.Http;
 using System.Web.Http.Description;
 using WebApi_ElGas.Context;
@@ -20,7 +22,7 @@ namespace WebApi_ElGas.Controllers
     public class DistribuidorsController : ApiController
     {
         private Model1 db = new Model1();
-        
+
 
         // GET: api/Distribuidors
         public IQueryable<Distribuidor> GetDistribuidor()
@@ -81,15 +83,51 @@ namespace WebApi_ElGas.Controllers
         // POST: api/Distribuidors
         [Route("PostDistribuidor")]
         [ResponseType(typeof(Distribuidor))]
-        public IHttpActionResult PostDistribuidor(Distribuidor distribuidor)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PostDistribuidorAsync(Distribuidor distribuidor)
         {
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
             db.Distribuidor.Add(distribuidor);
             db.SaveChanges();
+
+
+            #region FireBase
+
+            var FirebaseUri = "https://elgas-f24e8.firebaseio.com/-LJVkHULelfySFjNF9-Q/Equipo-ElGas/Distribuidores.json";
+            var USER_AGENT = "firebase-net/1.0";
+
+            var rutajson = new DistribuidorFirebase { id = distribuidor.IdDistribuidor, Latitud = 0, Longitud = 0 };
+            var json = JsonConvert.SerializeObject(rutajson);
+            var client = new HttpClient();
+            var msg = new HttpRequestMessage(new HttpMethod("Post"), FirebaseUri);
+            msg.Headers.Add("user-agent", USER_AGENT);
+            if (json != null)
+            {
+                msg.Content = new StringContent(
+                    json,
+                    UnicodeEncoding.UTF8,
+                    "application/json");
+            }
+
+            var respuesta = await client.SendAsync(msg);
+
+            var result = await respuesta.Content.ReadAsStringAsync();
+            var idFirebase = JsonConvert.DeserializeObject<ResultFirbase>(result);
+
+            Debug.Write(idFirebase.name);
+
+            db.Entry(distribuidor).State = EntityState.Modified;
+
+            distribuidor.FirebaseID = idFirebase.name;
+
+            db.SaveChanges();
+
+
+            #endregion
+
 
             return Ok();
         }
@@ -116,11 +154,11 @@ namespace WebApi_ElGas.Controllers
             try
             {
                 db.Configuration.ProxyCreationEnabled = false;
-                
+
                 var Distribuidor = db.Distribuidor.Where(x => x.Correo == distribuidor.Correo).FirstOrDefault();
                 if (Distribuidor != null)
                 {
-                    if(distribuidor.DeviceID!=null)
+                    if (distribuidor.DeviceID != null)
                     {
                         Distribuidor.DeviceID = distribuidor.DeviceID;
                         db.SaveChanges();
@@ -210,7 +248,7 @@ namespace WebApi_ElGas.Controllers
         [Route("NearDistribuidor")]
         [ResponseType(typeof(Distribuidor))]
         [HttpPost]
-        
+
         public IHttpActionResult NearDistribuidor(Posicion myPosicion)
         {
             List<DistribuidorResponse> distribuidores = new List<DistribuidorResponse>();
@@ -220,7 +258,7 @@ namespace WebApi_ElGas.Controllers
             try
             {
 
-                var RutasHoy =  db.Ruta.Where(x => DbFunctions.TruncateTime(x.Fecha) == DateTime.Today).ToList();
+                var RutasHoy = db.Ruta.Where(x => DbFunctions.TruncateTime(x.Fecha) == DateTime.Today && x.Distribuidor.Habilitado == true).ToList();
 
 
 
@@ -238,11 +276,11 @@ namespace WebApi_ElGas.Controllers
                     distribuidores.Add(new DistribuidorResponse
                     {
 
-                        IdDistribuidor = (int) value.IdDistribuidor,
+                        IdDistribuidor = (int)value.IdDistribuidor,
                         Identificacion = identificacion,
                         Latitud = value.Latitud,
                         Longitud = value.Longitud
-                    });               
+                    });
                 }
 
 
@@ -252,8 +290,8 @@ namespace WebApi_ElGas.Controllers
 
 
 
-           
-            return Ok(distribuidores.ToList());
+
+                return Ok(distribuidores.ToList());
 
             }
             catch (Exception ex)

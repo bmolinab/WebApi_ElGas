@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.NotificationHubs;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -16,21 +17,35 @@ namespace WebApi_ElGas.Hubs
 
         public static async Task<bool> SendNotificationAsync(string message, System.Collections.Generic.IEnumerable<string> tags, string to, string tipo, int idCompra, string idDistribuidor)
         {
-            hub = NotificationHubClient.CreateClientFromConnectionString(ListenConnectionString, NotificationHubName);
-            var notif = ("{\"data\":{\"message\":\"" + message + "\"}}");
-
-            if (to!="" && to != null)
+            try
             {
 
-           
-                 notif = ("{\"to\":\"" +to.ToString()+
-                    "\",\"data\":" +
-                    "{\"message\":\"" + message + "\",\"tipo\":\""+tipo+"\",\"idCompra\":\""+idCompra+ "\",\"idDistribuidor\":\"" + idDistribuidor + "\"}" +
-                    "}");
+
+                hub = NotificationHubClient.CreateClientFromConnectionString(ListenConnectionString, NotificationHubName);
+                
+                var notif = ("{\"data\":{\"message\":\"" + message + "\"}}");
+
+                if (to != "" && to != null)
+                {
+
+
+                    notif = ("{\"to\":\"" + to.ToString() +
+                       "\",\"data\":" +
+                       "{\"message\":\"" + message + "\",\"tipo\":\"" + tipo + "\",\"idCompra\":\"" + idCompra + "\",\"idDistribuidor\":\"" + idDistribuidor + "\"}" +
+                       "}");
+
+                }
+                await hub.SendGcmNativeNotificationAsync(notif, tags);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                
+                return true;
+
 
             }
-             hub.SendGcmNativeNotificationAsync(notif,tags);
-             return true;
         }
     }
 }

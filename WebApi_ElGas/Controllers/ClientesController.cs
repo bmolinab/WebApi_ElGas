@@ -80,12 +80,14 @@ namespace WebApi_ElGas.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+
             }
+            cliente.FechaRegistro = DateTime.Now;
 
             db.Cliente.Add(cliente);
             db.SaveChanges();
 
-          //  return CreatedAtRoute("DefaultApi", new { id = cliente.IdCliente }, cliente);
+            //  return CreatedAtRoute("DefaultApi", new { id = cliente.IdCliente }, cliente);
             return Ok(cliente);
 
         }
@@ -98,7 +100,7 @@ namespace WebApi_ElGas.Controllers
             {
                 db.Configuration.ProxyCreationEnabled = false;
                 var Cliente = db.Cliente.Where(x => x.Correo == cliente.Correo).FirstOrDefault();
-                if (Cliente!= null)
+                if (Cliente != null)
                 {
                     if (cliente.DeviceID != null)
                     {
@@ -112,7 +114,7 @@ namespace WebApi_ElGas.Controllers
                         Result = Cliente
                     };
                 }
-              
+
                 else
                     return new Response
                     {
@@ -127,11 +129,11 @@ namespace WebApi_ElGas.Controllers
                 return new Response
                 {
                     IsSuccess = false,
-                    Message = "Ocurrion un problema "+ex.Message,
+                    Message = "Ocurrion un problema " + ex.Message,
                     Result = null
                 };
             }
-          
+
             //  return CreatedAtRoute("DefaultApi", new { id = cliente.IdCliente }, cliente);
 
         }

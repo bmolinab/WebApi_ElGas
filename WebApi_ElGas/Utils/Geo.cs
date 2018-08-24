@@ -91,6 +91,31 @@ namespace WebApi_ElGas.Utils
             return inside;
 
         }
+
+        /// <summary>
+        /// Y=lat X=lon
+        /// </summary>
+        /// <param name="polygon"></param>
+        /// <param name="testPoint"></param>
+        /// <returns></returns>
+
+        public static bool IsPointInPolygonV2(ObservableCollection<Posicion> polygon, Posicion testPoint)
+        {
+            bool result = false;
+            int j = polygon.Count() - 1;
+            for (int i = 0; i < polygon.Count(); i++)
+            {
+                if (polygon[i].Latitud < testPoint.Latitud && polygon[j].Latitud >= testPoint.Latitud || polygon[j].Latitud < testPoint.Latitud && polygon[i].Latitud >= testPoint.Latitud)
+                {
+                    if (polygon[i].Longitud + (testPoint.Latitud - polygon[i].Latitud) / (polygon[j].Latitud - polygon[i].Latitud) * (polygon[j].Longitud - polygon[i].Longitud) < testPoint.Longitud)
+                    {
+                        result = !result;
+                    }
+                }
+                j = i;
+            }
+            return result;
+        }
         /// <summary>
         /// Esta funcion nos regresa un boleano si las distancias estan dentro del rango del radio
         /// </summary>
@@ -118,7 +143,7 @@ namespace WebApi_ElGas.Utils
         /// <param name="lat2"></param>
         /// <param name="lon2"></param>
         /// <returns></returns>
-        static double Distancia(double lat1, double lon1, double lat2, double lon2)
+        public static double Distancia(double lat1, double lon1, double lat2, double lon2)
         {
 
             var R = 6371; // El radio de la tierra en Kilometros
