@@ -13,7 +13,9 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
+using WebApi_ElGas.Context;
 using WebApi_ElGas.Models;
+using WebApi_ElGas.Plugins;
 using WebApi_ElGas.Providers;
 using WebApi_ElGas.Results;
 
@@ -23,12 +25,15 @@ namespace WebApi_ElGas.Controllers
     [RoutePrefix("api/Account")]
     public class AccountController : ApiController
     {
+
+
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
 
         public AccountController()
         {
         }
+
 
         public AccountController(ApplicationUserManager userManager,
             ISecureDataFormat<AuthenticationTicket> accessTokenFormat)
@@ -332,6 +337,7 @@ namespace WebApi_ElGas.Controllers
 
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
 
+
             if (!result.Succeeded)
             {
                 return GetErrorResult(result);
@@ -340,6 +346,31 @@ namespace WebApi_ElGas.Controllers
 
             return Ok(user);
         }
+
+        [AllowAnonymous]
+        [Route("RecoveryPass")]
+        public async Task<IHttpActionResult> RecoveryPass(RegisterBindingModel model)
+        {
+            Correo correo = new Correo();
+
+
+            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+
+            var result = await UserManager.FindByEmailAsync(user.Email);
+
+            if (result==null)
+            {
+                return GetErrorResult(new IdentityResult());
+            }
+
+            result.CodeRecovery = correo.GenerarCodigo();
+
+            IdentityResult result2 = await UserManager.UpdateAsync(result);
+
+           await correo.Enviar(new ContrasenaRequest() { Codigo = result.CodeRecovery.ToString(), Email = result.Email });       
+            return Ok(result);
+        }
+
 
         // POST api/Account/RegisterExternal
         [OverrideAuthentication]
@@ -489,6 +520,8 @@ namespace WebApi_ElGas.Controllers
                 return HttpServerUtility.UrlTokenEncode(data);
             }
         }
+
+       
 
         #endregion
     }
