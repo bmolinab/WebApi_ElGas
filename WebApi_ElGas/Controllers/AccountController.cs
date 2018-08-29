@@ -346,31 +346,56 @@ namespace WebApi_ElGas.Controllers
 
             return Ok(user);
         }
-
+        /// <summary>
+        /// Funcion para generar y enviar el codigo ha el usuario
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [AllowAnonymous]
-        [Route("RecoveryPass")]
-        public async Task<IHttpActionResult> RecoveryPass(RegisterBindingModel model)
+        [Route("GenerateCode")]
+        public async Task<IHttpActionResult> GenerateCode(RegisterBindingModel model)
         {
             Correo correo = new Correo();
-
-
             var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
-
             var result = await UserManager.FindByEmailAsync(user.Email);
-
             if (result==null)
             {
                 return GetErrorResult(new IdentityResult());
             }
-
             result.CodeRecovery = correo.GenerarCodigo();
-
             IdentityResult result2 = await UserManager.UpdateAsync(result);
-
-           await correo.Enviar(new ContrasenaRequest() { Codigo = result.CodeRecovery.ToString(), Email = result.Email });       
-            return Ok(result);
+            await correo.Enviar(new PasswordRequest() { Codigo = (int)result.CodeRecovery, Email = result.Email });       
+            return Ok();
         }
 
+        /// <summary>
+        /// Función para Recuperar contraseña validando el código que se envio al correo
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [Route("RecoveryPass")]
+        public async Task<IHttpActionResult> RecoveryPass(PasswordRequest passwordRequest)
+        {
+
+            var user = new ApplicationUser() { UserName = passwordRequest.Email, Email = passwordRequest.Email };
+
+            var result = await UserManager.FindByEmailAsync(user.Email);
+
+            if (result == null)
+            {
+                return GetErrorResult(new IdentityResult());
+            }
+
+            if(result.CodeRecovery==passwordRequest.Codigo)
+            {
+                string resetToken = await UserManager.GeneratePasswordResetTokenAsync(result.Id);
+                IdentityResult passwordChangeResult = await UserManager.ResetPasswordAsync(result.Id, resetToken, passwordRequest.NewPassword);
+            }
+
+
+            return Ok(result);
+        }
 
         // POST api/Account/RegisterExternal
         [OverrideAuthentication]

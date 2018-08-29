@@ -13,7 +13,7 @@ namespace WebApi_ElGas.Plugins
     public class Correo
     {
 
-        public async Task<Response> Enviar(ContrasenaRequest contrasenaRequest)
+        public async Task<Response> Enviar(PasswordRequest contrasenaRequest)
         {
             try
             {
