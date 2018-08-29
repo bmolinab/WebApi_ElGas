@@ -35,7 +35,7 @@ namespace WebApi_ElGas.Plugins
 
 
                 //Send email  
-                WebMail.Send(to: contrasenaRequest.Email, subject: "Contraseña: " + contrasenaRequest.Codigo, body: "Contraseña: " + contrasenaRequest.Codigo, isBodyHtml: true);
+                WebMail.Send(to: contrasenaRequest.Email, subject: "Código de Seguridad: " + contrasenaRequest.Codigo, body: "Código de seguridad: " + contrasenaRequest.Codigo, isBodyHtml: true);
                 return new Response { IsSuccess = true };
             }
             catch (Exception ex)
