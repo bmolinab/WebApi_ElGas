@@ -51,6 +51,10 @@ namespace WebApi_ElGas.Context
 
         public DateTime? FechaRegistro { get; set; }
 
+        public int? IdSector { get; set; }
+
+        public virtual Sector Sector { get; set; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CompraCancelada> CompraCancelada { get; set; }
 

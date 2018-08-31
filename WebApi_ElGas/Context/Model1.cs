@@ -11,7 +11,7 @@ namespace WebApi_ElGas.Context
             : base("name=Model1")
         {
         }
-
+        public virtual DbSet<Ciudad> Ciudad { get; set; }
         public virtual DbSet<Cliente> Cliente { get; set; }
         public virtual DbSet<Compra> Compra { get; set; }
         public virtual DbSet<CompraCancelada> CompraCancelada { get; set; }
@@ -26,6 +26,11 @@ namespace WebApi_ElGas.Context
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<Ciudad>()
+                .Property(e => e.Nombre)
+                .IsUnicode(false);
+
             modelBuilder.Entity<Cliente>()
                 .Property(e => e.Identificacion)
                 .IsUnicode(false);

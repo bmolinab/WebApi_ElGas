@@ -12,6 +12,7 @@ namespace WebApi_ElGas.Context
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Sector()
         {
+            Cliente = new HashSet<Cliente>();
             PuntoSector = new HashSet<PuntoSector>();
             SectorDistribuidor = new HashSet<SectorDistribuidor>();
         }
@@ -21,6 +22,13 @@ namespace WebApi_ElGas.Context
 
         [StringLength(140)]
         public string Nombre { get; set; }
+
+        public int? IdCiudad { get; set; }
+
+        public virtual Ciudad Ciudad { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Cliente> Cliente { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PuntoSector> PuntoSector { get; set; }
