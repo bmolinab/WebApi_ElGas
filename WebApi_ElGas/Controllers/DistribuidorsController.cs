@@ -27,6 +27,8 @@ namespace WebApi_ElGas.Controllers
         // GET: api/Distribuidors
         public IQueryable<Distribuidor> GetDistribuidor()
         {
+            db.Configuration.ProxyCreationEnabled = false;
+
             return db.Distribuidor;
         }
 

@@ -98,6 +98,14 @@ namespace WebApi_ElGas.Context
                 .IsUnicode(false);
 
             modelBuilder.Entity<Distribuidor>()
+                .Property(e => e.FirebaseID)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Distribuidor>()
+                .Property(e => e.Direccion)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Distribuidor>()
                 .HasMany(e => e.CompraCancelada)
                 .WithRequired(e => e.Distribuidor)
                 .WillCascadeOnDelete(false);

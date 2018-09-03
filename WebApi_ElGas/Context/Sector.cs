@@ -14,6 +14,7 @@ namespace WebApi_ElGas.Context
         {
             Cliente = new HashSet<Cliente>();
             PuntoSector = new HashSet<PuntoSector>();
+            Distribuidor = new HashSet<Distribuidor>();
             SectorDistribuidor = new HashSet<SectorDistribuidor>();
         }
 
@@ -29,6 +30,9 @@ namespace WebApi_ElGas.Context
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cliente> Cliente { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Distribuidor> Distribuidor { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PuntoSector> PuntoSector { get; set; }

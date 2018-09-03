@@ -66,7 +66,6 @@ namespace WebApi_ElGas.Controllers
         [Route("GetSectorsByCity/{id:int:min(1)}")]
         public async Task<List<SectorRequest>> GetSectorsByCity(int id)
         {
-
             try
             {
                 db.Configuration.ProxyCreationEnabled = false;
